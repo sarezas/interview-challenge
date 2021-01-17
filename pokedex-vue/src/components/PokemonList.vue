@@ -4,21 +4,21 @@
       v-for="po in pokemons"
       :key="po.name"
       :to="{ name: 'pokemon', params: { name: po.name } }"
-      class="card"
     >
-      <div @click="updateAppState(po)">
-        <img class="image" :src="getFrontDefaultSprite(po.sprites)" />
+      <div class="card" @click="updateAppState(po)">
+        <img v-if="po.sprites" class="image" :src="getFrontDefaultSprite(po.sprites)" />
         <h2 class="name">{{ po.name }}</h2>
-        <svg
-          viewBox="0 0 300 275"
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          class="star"
-        >
-          <polygon :fill='pokemon.favorite ? '#eee' : 'none'' stroke='#eee'
-          stroke-width='20' points='150,25 179,111 269,111 197,165 223,251
-          150,200 77,251 103,165 31,111 121,111' />
-        </svg>
+          <svg
+            @click.stop="setPokemonFavourite(po.name, $event)"
+            viewBox="0 0 300 275"
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+            class="star"
+          >
+            <polygon :fill="po.isFavourite ? '#fff' : 'none'" stroke="#eee"
+            stroke-width="20" points="150,25 179,111 269,111 197,165 223,251
+            150,200 77,251 103,165 31,111 121,111" />
+          </svg>
       </div>
     </router-link>
   </div>
@@ -43,35 +43,40 @@ export default {
   methods: {
     updateAppState(pokemon) {
       appState.selectedPokemon = pokemon;
-      appState.clearSelectedPokemon();
-      appState.persistSelectedPokemon(pokemon);
+      appState.clear('selectedPokemon');
+      appState.persist(pokemon, 'selectedPokemon');
     },
     getPokemons() {
+      const url = "https://pokeapi.co/api/v2/pokemon?limit=10";
+    
       return axios
-        .get("https://pokeapi.co/api/v2/pokemon?limit=10")
+        .get(url)
         .then((res) => {
           const { results: pokemonsFromApi } = res.data;
-
-          this.pokemons = pokemonsFromApi.map((p) => {
+          
+          this.pokemons = (pokemonsFromApi).map((p) => {
             return {
               name: p.name,
               metadaUrl: p.url,
-              isFavourite: false,
-              sprites: [],
+              isFavourite: p.isFavourite || false,
+              sprites: p.sprites || {},
             };
           });
         })
-        .catch();
+        .catch(e => console.log(e));
     },
     getMetaData() {
       const metadataPromises = this.pokemons.map((p) => axios.get(p.metadaUrl));
 
       return Promise.all(metadataPromises)
-        .then((res) => (this.metadata = res.map((r) => r.data)))
+        .then((res) => {
+          this.metadata = res.map((r) => r.data);
+        })
         .catch((e) => console.log(e));
     },
     getSprites: (metadata, pokemon) => {
-      const sprites = metadata
+      const metadataFromAppState = appState.retrieve('metadata');
+      const sprites = (metadata || metadataFromAppState)
         .filter((data) => data.forms.find((f) => f.name === pokemon.name))
         .map((d) => d.sprites)[0];
 
@@ -80,24 +85,39 @@ export default {
     getFrontDefaultSprite(sprites) {
       return sprites.front_default;
     },
+    setPokemonFavourite(name, event) {
+      event.preventDefault();
+
+      const targetPokemon = this.pokemons.find(p => p.name === name);
+      targetPokemon.isFavourite = true;
+
+      appState.persist(this.pokemons, 'pokemons');
+    },
   },
   // Quest 1 - Fetch pokemon data
   created() {
-    this.getPokemons()
-      .then(() => {
-        return this.getMetaData();
-      })
-      .then((res) => {
-        this.pokemons = this.pokemons.map((p) => {
-          return {
-            name: p.name,
-            isFavourite: false,
-            sprites: this.getSprites(this.metadata, p),
-          };
-        });
+    const pokemonsFromAppState = appState.retrieve('pokemons');
 
-        console.log("end-result: ", this.pokemons);
-      });
+    if (pokemonsFromAppState) {
+      this.pokemons = pokemonsFromAppState;
+    } else {
+      this.getPokemons()
+        .then(() => {
+          return this.getMetaData();
+        })
+        .then(() => {
+          this.pokemons = this.pokemons.map((p) => {
+            return {
+              name: p.name,
+              metadaUrl: p.url,
+              isFavourite: p.isFavourite,
+              sprites: this.getSprites(this.metadata, p),
+            };
+          });
+          appState.persist(this.pokemons, 'pokemons');
+          appState.persist(this.metadata, 'metadata');
+        });
+    }
   },
 };
 </script>
@@ -108,7 +128,7 @@ export default {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   grid-gap: 20px;
   justify-items: stretch;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 

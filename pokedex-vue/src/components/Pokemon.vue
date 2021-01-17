@@ -11,6 +11,8 @@
       <div class="type" />
     </div>
     <table class="stats" />
+
+    <router-link :to="{ name: 'home' }">Back</router-link>
   </div>
 </template>
 
@@ -32,7 +34,7 @@ export default {
     );
 
     this.selectedPokemon =
-      appState.selectedPokemon || appState.retrieveSelectedPokemon();
+      appState.selectedPokemon || appState.retrieve('selectedPokemon');
   },
 };
 </script>
