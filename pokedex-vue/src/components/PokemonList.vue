@@ -57,8 +57,8 @@ export default {
             return {
               name: p.name,
               metadaUrl: p.url,
-              isFavourite: p.isFavourite || false,
-              sprites: p.sprites || {},
+              isFavourite: false,
+              sprites: {},
               types: [],
               stats: [],
             };
@@ -110,7 +110,6 @@ export default {
       });
     },
   },
-  // Quest 1 - Fetch pokemon data
   created() {
     const pokemonsFromAppState = appState.retrieve('pokemons');
 
