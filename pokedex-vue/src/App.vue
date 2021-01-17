@@ -18,7 +18,7 @@ body {
   margin: 0;
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   color: #eee;
-  background-color: #dc6464;
+  background-color: #e06767;
 }
 
 h2 {
