@@ -10,7 +10,28 @@
     <div class="types">
       <div class="type" />
     </div>
-    <table class="stats" />
+    <table border="1" class="stats">
+      <tbody>
+        <tr>
+          <th>stat</th>
+          <th v-for="s in selectedPokemon.stats" :key="s.stat.name">
+            {{ s.stat.name }}
+          </th>
+        </tr>
+        <tr>
+          <th>base</th>
+          <td v-for="s in selectedPokemon.stats" :key="s.stat.name">
+            {{ s.base_stat }}
+          </td>
+        </tr>
+        <tr>
+          <th>effort</th>
+          <td v-for="s in selectedPokemon.stats" :key="s.stat.name">
+            {{ s.effort }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <router-link :to="{ name: 'home' }">Back</router-link>
   </div>
@@ -27,7 +48,6 @@ export default {
       selectedPokemon: {},
     };
   },
-
   mounted() {
     const isSamePokemon = window.location.href.includes(
       this.$route.params.name
@@ -82,6 +102,14 @@ export default {
 }
 
 .stats {
-  border-spacing: 20px 0;
+  margin-bottom: 2rem;
+
+  th, td {
+    padding: 1rem;
+
+    text-align: center;
+    text-justify: center;
+    text-transform: capitalize;
+  }
 }
 </style>

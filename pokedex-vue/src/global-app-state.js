@@ -1,6 +1,5 @@
 export const appState = {
   pokemons: undefined,
-  metadata: undefined,
   selectedPokemon: undefined,
   persist: (target, targetName) => {
     localStorage.setItem(targetName, JSON.stringify(target));
