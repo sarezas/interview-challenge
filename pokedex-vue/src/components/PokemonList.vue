@@ -81,10 +81,10 @@ export default {
         .map((d) => d.sprites)[0];
     },
     getTypes: (metadata, pokemon) => {
-      return metadata.filter(data => data.forms.find(f => f.name === pokemon.name)).map(d => d.types);
+      return metadata.filter(data => data.forms.find(f => f.name === pokemon.name)).map(d => d.types)[0];
     },
     getStats: (metadata, pokemon) => {
-      return metadata.filter(data => data.forms.find(f => f.name === pokemon.name)).map(d => d.stats);
+      return metadata.filter(data => data.forms.find(f => f.name === pokemon.name)).map(d => d.stats)[0];
     },
     getFrontDefaultSprite(sprites) {
       return sprites.front_default;
@@ -96,6 +96,18 @@ export default {
       targetPokemon.isFavourite = !targetPokemon.isFavourite;
 
       appState.persist(this.pokemons, 'pokemons');
+    },
+    sortPokemonsAlphabetically: (pokemons) => {
+      return pokemons.sort((p1, p2) => {
+        if (p1.name < p2.name) {
+          return -1;
+        }
+        if (p1.name > p2.name) {
+          return 1;
+        }
+
+        return 0;
+      });
     },
   },
   // Quest 1 - Fetch pokemon data
@@ -110,7 +122,7 @@ export default {
           return this.getMetaData();
         })
         .then(() => {
-          this.pokemons = this.pokemons.map((p) => {
+          this.pokemons = this.sortPokemonsAlphabetically(this.pokemons.map((p) => {
             return {
               name: p.name,
               metadaUrl: p.url,
@@ -119,7 +131,7 @@ export default {
               types: this.getTypes(this.metadata, p),
               stats: this.getStats(this.metadata, p),
             };
-          }).sort();
+          }));
 
           appState.persist(this.pokemons, 'pokemons');
         });
