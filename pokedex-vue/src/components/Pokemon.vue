@@ -27,7 +27,6 @@ export default {
       selectedPokemon: {},
     };
   },
-
   mounted() {
     const isSamePokemon = window.location.href.includes(
       this.$route.params.name
