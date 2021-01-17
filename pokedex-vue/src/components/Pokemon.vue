@@ -8,7 +8,9 @@
       {{ selectedPokemon.name }}
     </h2>
     <div class="types">
-      <div class="type" />
+      <div v-for="t in selectedPokemon.types" :key="t.type.name" class="type">
+        <h3>{{ t.type.name }}</h3>
+      </div>
     </div>
     <table border="1" class="stats">
       <tbody>
@@ -89,7 +91,7 @@ export default {
 
 .types {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
 }
 
 .type {
